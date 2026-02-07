@@ -52,7 +52,7 @@ Each phase is documented directly in the notebook with clear intent, results, an
 - Mean baseline
 - Ridge Regression
 - Random Forest Regressor
-- HistGradientBoosting Regressor (best performer)
+- HistGradientBoosting Regressor
 
 ---
 
@@ -62,35 +62,46 @@ Each phase is documented directly in the notebook with clear intent, results, an
   - 24-hour lag
 - Rolling statistics:
   - 24-hour rolling mean
-- Strict leakage prevention using shifted values only
+- Strict leakage prevention using shifted historical values only
 
 ---
 
-## Evaluation Metric
-- **RMSE (Root Mean Squared Error)**
-- Validation set is used for model selection
-- Test set reserved for final evaluation only
+## Evaluation Strategy
+- **RMSE (Root Mean Squared Error)** is used as the primary metric  
+- Validation set is used for model comparison  
+- Test set is used exactly once for final evaluation  
+- No random shuffling or standard cross-validation is applied to preserve temporal integrity  
+
+Hyperparameter tuning via GridSearch or RandomizedSearch was intentionally avoided to prevent temporal leakage and to prioritize interpretability and methodological correctness.
 
 ---
 
-## Key Results (Validation RMSE)
+## Key Results
 | Model | RMSE |
 |-----|------|
 | Ridge (with lag features) | ~4350 |
 | Random Forest | ~4566 |
-| HistGradientBoosting | ~4031 |
+| HistGradientBoosting (Validation) | ~4031 |
+| **HistGradientBoosting (Test)** | **3743** |
 
-HistGradientBoosting achieved the best performance, indicating the importance of combining **temporal feature engineering** with **non-linear modeling**.
+The final model demonstrates strong generalization, with test performance improving over validation results.
 
 ---
 
-## Error Analysis (Ongoing)
-Current analysis focuses on:
-- temporal drift in residuals
-- peak-hour error behavior
-- season-wise and source-wise failure patterns
+## Error Analysis
+Error analysis was conducted to understand model limitations beyond aggregate metrics:
+- Residuals exhibit temporal clustering, indicating periods of increased uncertainty
+- Errors increase during high production levels, highlighting peak-load challenges
+- Certain hours and seasons show consistently higher errors, revealing context-dependent failure modes
 
-This phase aims to move beyond aggregate metrics and understand **model limitations**.
+---
+
+## Stability & Robustness
+- Model performance remains stable across monthly validation segments
+- RMSE does not disproportionately increase across production ranges
+- Improvements are not driven by a narrow subset of the data
+
+These checks increase confidence that the model’s performance generalizes beyond a single validation window.
 
 ---
 
