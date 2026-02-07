@@ -1,8 +1,13 @@
-Energy\ Production\ Dataset.csv 
+# Virtual environments
 env/
 venv/
 .venv/
-__pycache__/
+
+# Jupyter / Python cache
 .ipynb_checkpoints/
-*.csv
+__pycache__/
+*.pyc
+
+# Data
 data/
+*.csv
