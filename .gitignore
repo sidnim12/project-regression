@@ -1,2 +1,5 @@
 Energy\ Production\ Dataset.csv 
-data/ 
+data/
+.ipynb_checkpoints/
+*.csv
+
