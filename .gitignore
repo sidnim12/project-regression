@@ -1,5 +1,8 @@
 Energy\ Production\ Dataset.csv 
-data/
+env/
+venv/
+.venv/
+__pycache__/
 .ipynb_checkpoints/
 *.csv
-
+data/
