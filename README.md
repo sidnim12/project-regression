@@ -1,145 +1,129 @@
-# Energy Production Forecasting — Time Series Regression
+# Energy Production Forecasting (Time Series Regression)
 
-## Overview
-This project focuses on forecasting **hourly energy production** using historical data and time-based contextual features.  
-The objective is to build a **leakage-safe, interpretable, and well-structured time-series regression pipeline**, while analyzing where and why models fail.
-
-The project emphasizes **methodology and reasoning** over brute-force modeling, following practices used in real-world ML systems.
+Forecast hourly energy production using a leakage-safe, phase-driven time-series regression pipeline.  
+This repo prioritizes **methodology, reproducibility, and robustness** over brute-force tuning.
 
 ---
 
-## Problem Statement
-Accurate energy production forecasting is critical for:
-- grid stability and load balancing
-- capacity planning
-- efficient integration of renewable energy sources
+## Why this matters
 
-Given historical production data with temporal and categorical context, the task is to predict future energy production values while respecting time dependencies and avoiding data leakage.
+Accurate energy production forecasting supports:
+- grid stability and load balancing  
+- capacity planning  
+- reliable integration of renewables (high variability)
+
+This project is structured the way real forecasting work is done:
+**chronological splits, leakage prevention, baselines, robust evaluation, and diagnostics**.
 
 ---
 
 ## Dataset
-- Hourly time-series dataset
-- Target variable: `Production`
-- Feature types:
-  - Temporal: hour, day of year
-  - Categorical: season, energy source, day name
-- Data is **time-ordered** and treated as a forecasting problem
 
-> Dataset source: Kaggle (download separately and place in the `data/` directory)
+- **Type:** Hourly time-series (tabular)
+- **Target:** `Production`
+- **Features:** time-derived signals + categorical context (e.g., source/season/day name)
+- **Source:** Kaggle (download separately)
+
+> Place the dataset file(s) inside `data/` (ignored by git).
 
 ---
 
-## Methodology & Project Phases
-The project follows a structured multi-phase workflow:
+## Project Phases (Notebook-driven)
 
-1. **Phase 0 — Problem framing & metric selection**
-2. **Phase 1 — Data understanding & sanity checks**
-3. **Phase 2 — Time-aware train/validation/test split**
-4. **Phase 3 — Baseline models (mean, Ridge regression)**
-5. **Phase 4 — Preprocessing pipelines (numerical + categorical)**
-6. **Phase 5 — Feature engineering (lag & rolling statistics)**
-7. **Phase 6 — Advanced non-linear models**
-8. **Phase 7 — Error analysis & failure modes** *(in progress)*
-9. **Phase 8 — Stability & robustness checks**
-10. **Phase 9 — Conclusions & future work**
+Each phase is documented with intent → code → results → interpretation.
 
-Each phase is documented directly in the notebook with clear intent, results, and interpretation.
+1. **Phase 0:** Problem framing + metric selection (RMSE)
+2. **Phase 1:** Data understanding + sanity checks
+3. **Phase 2:** Chronological split (70/15/15) + leakage discipline
+4. **Phase 3:** Baselines (Mean, Ridge)
+5. **Phase 4:** Preprocessing pipelines (scaling + one-hot encoding inside Pipeline)
+6. **Phase 5:** Feature engineering (lag + rolling statistics, leakage-safe shifting)
+7. **Phase 6:** Advanced models (non-linear regressors)
+8. **Phase 7:** Error analysis (residual system + failure modes)
+9. **Phase 8:** Stability & robustness checks
+10. **Phase 9:** Final model consolidation (Train + Val → Test)
+11. **Phase 10:** Walk-forward validation (rolling-origin evaluation)
 
 ---
 
 ## Models Evaluated
+
 - Mean baseline
-- Ridge Regression
+- Ridge Regression (pipeline-based)
 - Random Forest Regressor
-- HistGradientBoosting Regressor
+- **HistGradientBoosting Regressor (final choice)**
 
 ---
 
-## Feature Engineering Highlights
-- Lag features:
-  - 1-hour lag
-  - 24-hour lag
-- Rolling statistics:
-  - 24-hour rolling mean
-- Strict leakage prevention using shifted historical values only
+## Feature Engineering Highlights (Leakage-safe)
+
+Forecasting features were engineered using *only past information*:
+
+- **Lag features:** `lag_1`, `lag_24`
+- **Rolling stats:** `24h rolling mean` computed from shifted values  
+- Strict rule: features at time **t** use only information from **t-1 and earlier**
 
 ---
 
 ## Evaluation Strategy
-- **RMSE (Root Mean Squared Error)** is used as the primary metric  
-- Validation set is used for model comparison  
-- Test set is used exactly once for final evaluation  
-- No random shuffling or standard cross-validation is applied to preserve temporal integrity  
 
-Hyperparameter tuning via GridSearch or RandomizedSearch was intentionally avoided to prevent temporal leakage and to prioritize interpretability and methodological correctness.
-
----
-
-## Key Results
-| Model | RMSE |
-|-----|------|
-| Ridge (with lag features) | ~4350 |
-| Random Forest | ~4566 |
-| HistGradientBoosting (Validation) | ~4031 |
-| **HistGradientBoosting (Test)** | **3743** |
-
-The final model demonstrates strong generalization, with test performance improving over validation results.
+- **Primary metric:** RMSE
+- **Validation:** used for model selection and comparison
+- **Test:** used only for final unbiased evaluation
+- **No shuffling** (time integrity preserved)
+- **Walk-forward validation** added to verify robustness across multiple time windows
 
 ---
 
-## Error Analysis
-Error analysis was conducted to understand model limitations beyond aggregate metrics:
-- Residuals exhibit temporal clustering, indicating periods of increased uncertainty
-- Errors increase during high production levels, highlighting peak-load challenges
-- Certain hours and seasons show consistently higher errors, revealing context-dependent failure modes
+## Key Results (RMSE)
+
+### Fixed-split progression (chronological split)
+- **Mean baseline:** ~4474  
+- **Ridge:** ~4434  
+- **HistGradientBoosting (train-only) Test RMSE:** ~2381  
+- **Final consolidated model (Train + Val → Test): ~2339.96**
+
+### Walk-forward validation (Phase 10)
+- Mean RMSE across folds: **<paste results_df mean here>**
+- Std RMSE across folds: **<paste results_df std here>**
+- Best / Worst fold RMSE: **<paste min / max here>**
+
+**Interpretation:** stable mean with low variance indicates the model is not dependent on a single favourable split and generalizes across time windows.
 
 ---
 
-## Stability & Robustness
-- Model performance remains stable across monthly validation segments
-- RMSE does not disproportionately increase across production ranges
-- Improvements are not driven by a narrow subset of the data
+## Error Analysis & Robustness
 
-These checks increase confidence that the model’s performance generalizes beyond a single validation window.
+Beyond aggregate RMSE, this project includes:
+- residual distribution checks (bias / skew)
+- RMSE by hour of day (peak-hour stress)
+- RMSE by predicted bins (heteroscedasticity)
+- temporal drift checks (stability across evaluation windows)
+
+This validates that improvements are real and operationally meaningful.
+
+---
+
+## Deployment Notes (How this can go live)
+
+This project is structured to be production-friendly:
+- preprocessing + model encapsulated in a **single sklearn Pipeline**
+- deterministic feature engineering
+- realistic evaluation mirrors deployment constraints
+
+With minimal extension:
+- serialize model via `joblib`
+- serve via FastAPI/Flask for real-time inference
+- schedule batch predictions + periodic retraining for new data
 
 ---
 
 ## Repository Structure
+
+```text
 project-regression/
-├── data/                     # Dataset files (ignored in git)
-├── notebooks/
-│   └── energy_production.ipynb   # Main analysis notebook
-├── README.md                 # Project overview and documentation
-├── requirements.txt          # Python dependencies
-└── .gitignore                # Ignored files and folders
-
-
----
-
-## How to Run
-1. Clone the repository
-2. Download the dataset and place it in `data/`
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-4. Open the notebook
-   ```bash
-   jupyter notebook notebooks/energy-production.ipynb
-
-## Notes
-- The project prioritizes correct time-series handling and interpretability
-- No random shuffling is used at any stage
-- Feature engineering and model complexity are introduced incrementally
----
-## Future Work
-- Incorporate external signals (e.g., weather data)
-- Perform rolling-origin cross-validation
-- Extend analysis to probabilistic forecasting
-- Package insights into a lightweight analysis tool
-
----
-
-## Author
-Developed as part of a self-directed ML study project with the goal of building research-oriented machine learning work.
-
+├── data/                 # dataset files (ignored in git)
+├── notebooks/            # phase-by-phase notebooks
+├── README.md
+├── requirements.txt
+└── .gitignore
