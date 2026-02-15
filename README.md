@@ -127,3 +127,69 @@ project-regression/
 ├── README.md
 ├── requirements.txt
 └── .gitignore
+```
+---
+## How to Run
+1️⃣ Clone the repository:
+```bash
+git clone https://github.com/sidnim12/project-regression.git
+cd project-regression
+```
+
+
+2️⃣ Create a virtual environment (recommended):
+
+```bash
+python -m venv venv
+```
+
+Activate it:
+
+Windows:
+```bash
+venv\Scripts\activate
+```
+Mac/Linux: 
+```bash
+source venv/bin/activate
+```
+
+3️⃣ Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+Add the dataset:
+Download the dataset from Kaggle and place the CSV file inside the data/ folder 
+example structure
+```text
+project-regression/
+├── data/
+│   └── energy_production.csv
+```
+
+4️⃣ Run the notebooks:
+```bash
+jupyter notebook
+```
+
+Open notebooks in order from Phase 0 through Phase 10.
+
+Expected outputs:
+- Validation RMSE comparison
+- Final Test RMSE 
+- Walk-forward mean/std RMSE,
+- residual/stability plots.
+
+---
+
+## 👤 Author
+
+**Sai Sidhardh Nimishakavi**
+
+Machine Learning Practitioner focused on structured, leakage-safe time-series modeling and real-world forecasting systems.
+
+This project reflects disciplined ML methodology, robust evaluation practices, and deployment-aware design.
+
+📫 GitHub: [sidnim12](https://github.com/sidnim12)  
+🔗 LinkedIn: [Sai Sidhardh Nimishakavi](https://www.linkedin.com/in/sai-sidhardh-nimishakavi-8132b6372)
