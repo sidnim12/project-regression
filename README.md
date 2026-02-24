@@ -240,51 +240,7 @@ Expected outputs:
 - Residual and stability plots  
 
 ---
-# Project Evolution
 
-This repository follows a structured, iterative development approach.
-
-## Stable Baseline (main branch)
-
-The `main` branch contains a consolidated, end-to-end notebook implementing:
-
-- Chronological 70/15/15 split
-- Leakage-safe feature engineering (basic lag + rolling)
-- Baseline and advanced model comparison
-- Final Train + Validation consolidation
-- Held-out Test evaluation
-- Walk-forward validation diagnostics
-
-This branch represents the **stable, reproducible baseline implementation** of the forecasting workflow.
-
-Final Test RMSE in this configuration: **~3743**
-
----
-
-## Experimental Iteration (`refactor/split-phase` branch)
-
-The `refactor/split-phase` branch explores structural and modeling enhancements, including:
-
-- Modularization of pipeline logic (`src/` structure)
-- Stronger emphasis on walk-forward validation
-- Expanded lag and temporal feature engineering
-- Iterative feature refinement and model tuning
-
-These enhancements yielded improved performance (RMSE ~2339 under the revised configuration).
-
-This branch represents ongoing experimentation and methodological evolution beyond the stable baseline.
-
----
-
-This versioning reflects real-world ML development practice:
-
-1. Establish a stable baseline.
-2. Improve feature engineering and validation discipline.
-3. Iterate through controlled experimentation.
-
-The `main` branch remains the reference implementation for reproducibility, while the refactor branch captures iterative improvements.
-
----
 # Author
 
 Sai Sidhardh Nimishakavi  
